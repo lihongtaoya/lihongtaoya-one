@@ -1,0 +1,33 @@
+select hiscode , sum(indexdata) as indexdata,
+last_day(to_date('${period}-01' , 'yyyy-mm-dd')) as enddate ,
+to_date('${period}-01' , 'yyyy-mm-dd' ) as begindate 
+from (
+      select sum(sl) as indexdata , KDYS_ID as hiscode 
+      from  zlhis.VIEW_SH_MZ
+      where FYLB_NAME = '胃镜费'
+      and sl>0
+      and (sfje/sl) > 150
+      and (sfje/sl) <= 350
+      and sf_date>=('${period}')
+      And sf_date<to_char(to_date('${period}','yyyy-mm')+numtoyminterval(1,'month'),'yyyy-mm') 
+      group by KDYS_ID
+      union all
+      select sum(sl) as indexdata , KDYS_ID as hiscode 
+      from  zlhis.VIEW_SH_MZ
+      where FYLB_NAME = '胃镜费'
+      and sl<0
+      and (sfje/sl) > 150
+      and (sfje/sl) <= 350
+      and sf_date>=('${period}')
+      And sf_date<to_char(to_date('${period}','yyyy-mm')+numtoyminterval(1,'month'),'yyyy-mm') 
+      group by KDYS_ID
+)
+group by hiscode
+
+
+
+FYLB_NAME 费用类别名称
+sl 收费数量
+sfje 收费金额
+sf_date 收费时间
+KDYS_ID 开单医生代码
